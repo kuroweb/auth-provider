@@ -1,0 +1,67 @@
+require:
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rspec
+
+AllCops:
+  Exclude:
+    - bin/**/*
+    - db/schema.rb
+    - db/migrate/*.rb
+    - node_modules/**/*
+    - tmp/**/*
+    - vendor/**/*
+    - .pryrc
+  NewCops: enable
+
+Style/Documentation:
+  Enabled: false
+
+Style/AsciiComments:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/RedundantAssignment:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 15
+
+Layout/IndentationStyle:
+  Enabled: false
+
+RSpec/ContextWording:
+  Description: "テストケース名のチェックを無視"
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Description: "ひとつのテストケースで複数のexpectが存在することを許可"
+  Enabled: false
+
+RSpec/ExampleLength:
+  Description: "itに含まれるテストコードの行数の制限を無視"
+  Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Description: "letの定義回数の上限"
+  Enabled: true
+  Max: 8 # default: 5
+  AllowSubject: false # subjectも数に含める
+
+RSpec/NestedGroups:
+  Description: "ネストの深さ"
+  Enabled: true
+  Max: 7 # default: 3
+
+RSpec/IndexedLet:
+  Enabled: false
+
+Lint/MissingSuper:
+  Enabled: true
+  Exclude:
+    - "app/serializers/**/*.rb"

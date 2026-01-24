@@ -1,0 +1,83 @@
+x-mysql: &mysql
+  image: mysql/mysql-server:8.0
+  healthcheck:
+    test: ["CMD", "mysqladmin", "ping"]
+    interval: 5s
+    timeout: 5s
+    retries: 5
+  environment:
+    MYSQL_ROOT_HOST: "%"
+    MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+  stdin_open: true
+  tty: true
+
+x-redis: &redis
+  image: "redis:latest"
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 5s
+    timeout: 5s
+    retries: 5
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "127.0.0.2:443:443"
+    volumes:
+      - ./volumes/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./volumes/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      default:
+      shared:
+        aliases:
+          - dev.auth-provider.com
+
+  backend:
+    build:
+      context: .
+      dockerfile: containers/backend/Dockerfile
+    env_file: .env
+    environment:
+      DB_HOST_NAME: "backend-db"
+      DB_DATABASE_NAME: "rails"
+      DB_USER_NAME: "root"
+      DB_PASSWORD: ""
+      REDIS_URL: "redis://backend-redis:6379"
+      ALLOWED_ORIGINS: "nginx,dev.auth-provider.com"
+      DOMAIN_NAME: "dev.auth-provider.com"
+    stdin_open: true
+    tty: true
+    depends_on:
+      backend-db:
+        condition: service_healthy
+      backend-redis:
+        condition: service_healthy
+    volumes:
+      - ./volumes/backend:/app
+      - backend-bundle:/usr/local/bundle
+    ports:
+      - 5050:3000
+
+  backend-db:
+    <<: *mysql
+    volumes:
+      - backend-db:/var/lib/mysql
+
+  backend-redis:
+    <<: *redis
+    volumes:
+      - "backend-redis:/data"
+    command: --appendonly yes
+
+volumes:
+  backend-bundle:
+  backend-db:
+  backend-redis:
+
+networks:
+  shared:
+    name: shared-network

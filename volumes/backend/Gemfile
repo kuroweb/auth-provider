@@ -1,0 +1,43 @@
+source "https://rubygems.org"
+
+gem "bootsnap", require: false
+gem "devise"
+gem "doorkeeper"
+gem "doorkeeper-openid_connect"
+gem "importmap-rails"
+gem "jbuilder"
+gem "mysql2", "~> 0.5"
+gem "propshaft"
+gem "puma", ">= 5.0"
+gem "rails", "~> 8.0.2"
+gem "redis"
+gem "redis-session-store"
+gem "solid_cable"
+gem "solid_cache"
+gem "solid_queue"
+gem "stimulus-rails"
+gem "thruster", require: false
+gem "turbo-rails"
+gem "tzinfo-data", platforms: %i[windows jruby]
+
+group :development, :test do
+  gem "debug", platforms: %i[mri windows]
+  gem "pry-byebug"
+  gem "pry-doc"
+  gem "pry-rails"
+  gem "rspec"
+  gem "rspec-queue"
+  gem "rspec-rails"
+  gem "rubocop"
+  gem "rubocop-performance"
+  gem "rubocop-rails"
+  gem "rubocop-rspec"
+end
+
+group :test do
+  gem "capybara"
+  gem "factory_bot_rails"
+  gem "selenium-webdriver"
+  gem "shoulda-matchers"
+  gem "spring-commands-rspec"
+end

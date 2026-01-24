@@ -1,0 +1,16 @@
+# common
+.DS_Store
+.env
+
+# vscode
+.vscode/*
+!.vscode/settings.json.template
+
+# Cursor
+.cursor/rules/common
+
+# credentials
+*.pem
+.env
+
+docs/draft/*
