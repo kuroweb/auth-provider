@@ -1,0 +1,260 @@
+---
+alwaysApply: true
+---
+
+# Project Overview
+
+- OpenID Connect Provider (OP) 実装
+- 学習目的で構築された認証プロバイダー
+- price-monitoring アプリケーションの認証基盤として運用
+
+## Workspace Structure
+
+| リポジトリ | 説明 | 主な内容 |
+| -- | -- | -- |
+| `price-monitoring` | メインアプリケーション | 価格監視Webアプリ（Frontend/Backend） |
+| `auth-provider` | 認証プロバイダー | OpenID Connect Provider（Rails + Devise + Doorkeeper） |
+| `infra` | インフラ設定管理 | Ansible Playbooks、サーバー設定ファイル、セットアップ手順 |
+| `k8s` | Kubernetesマニフェスト | 本番環境のk8sリソース定義（GitOps） |
+| `k8s-secret` | シークレット管理 | 公開できないSecretリソース（プライベートリポジトリ） |
+
+## System Architecture
+
+```mermaid
+graph TB
+  subgraph "開発環境"
+    docker[Docker Compose]
+  end
+
+  subgraph "本番環境 - 自宅Kubernetes"
+    subgraph "OpenID Provider"
+      rails_auth[Rails Web]
+    end
+
+    subgraph "Databases"
+      mysql[(MySQL)]
+      redis[(Redis)]
+    end
+
+    subgraph "Infrastructure"
+      argocd[ArgoCD]
+      ingress[Ingress NGINX]
+    end
+  end
+
+  subgraph "Relying Party"
+    pm_frontend[price-monitoring Frontend]
+    pm_backend[price-monitoring Backend]
+  end
+
+  docker --> |CI/CD| argocd
+  argocd --> |GitOps| rails_auth
+  rails_auth --> mysql & redis
+  pm_frontend --> |OIDC Auth| rails_auth
+  pm_backend --> |Token Validation| rails_auth
+```
+
+## OIDC Flow
+
+```mermaid
+sequenceDiagram
+  participant user as User
+  participant rp_frontend as RP Frontend
+  participant rp_backend as RP Backend
+  participant op as Auth Provider (OP)
+
+  user->>rp_frontend: Access App
+  rp_frontend->>op: Authorization Request
+  op->>user: Login Page
+  user->>op: Enter Credentials
+  op->>rp_frontend: Authorization Code
+  rp_frontend->>rp_backend: Authorization Code
+  rp_backend->>op: Token Request
+  op->>rp_backend: Access Token + ID Token
+  rp_backend->>rp_frontend: Session Cookie
+  rp_frontend->>user: Authenticated
+```
+
+## Technology Stack
+
+- 言語: Ruby 3.x
+- フレームワーク: Rails 8.0.2
+- データベース: MySQL 8.0
+- キャッシュ/セッション: Redis
+- 認証ライブラリ:
+  - Devise（ユーザー認証）
+  - Doorkeeper（OAuth 2.0）
+  - doorkeeper-openid_connect（OIDC拡張）
+- フロントエンド: Hotwire（Turbo + Stimulus）
+
+## OIDC Configuration
+
+- Access Token: 2時間有効
+- ID Token: 10分有効
+- Refresh Token: 有効
+- reuse_access_token: 有効
+
+### Standard Endpoints
+
+| エンドポイント | パス |
+| -- | -- |
+| Discovery | `/.well-known/openid-configuration` |
+| Authorization | `/oauth/authorize` |
+| Token | `/oauth/token` |
+| UserInfo | `/oauth/userinfo` |
+
+### Supported Scopes
+
+| スコープ | 説明 |
+| -- | -- |
+| `openid` | 必須、ID Token発行 |
+| `email` | メールアドレス取得 |
+| `profile` | プロフィール情報取得 |
+
+## Infrastructure Overview
+
+### Development
+
+- Docker Compose 構成
+- mkcert によるローカルHTTPS
+- ループバックエイリアス（127.0.0.2）
+
+### Production
+
+- 自宅Kubernetes（Master x 1、Worker x 3）
+- ArgoCD による GitOps デプロイ
+- Ingress NGINX + Cloudflare
+
+## CI/CD Pipeline
+
+```mermaid
+sequenceDiagram
+  participant dev as Developer
+  participant github as GitHub
+  participant actions as GitHub Actions
+  participant registry as Private Registry
+  participant argocd as ArgoCD
+  participant k8s as Kubernetes
+
+  dev->>github: git push
+  github->>actions: trigger CI/CD
+  actions->>actions: docker build
+  actions->>registry: docker push
+  actions->>github: update k8s manifests
+  argocd->>github: detect changes
+  argocd->>k8s: apply manifests
+```
+
+## Key URLs
+
+### Production
+
+| サービス | URL |
+| -- | -- |
+| Auth Provider | https://auth.price-monitoring.kuroweb.net |
+| price-monitoring | https://price-monitoring.kuroweb.net |
+| ArgoCD | https://argocd.kuroweb.net |
+
+### Development
+
+| サービス | URL |
+| -- | -- |
+| Auth Provider | https://dev.auth-provider.com |
+
+## Development Workflow
+
+- ローカル開発: Docker Compose
+- タスクランナー: just
+- コマンド例:
+  - `just up` - コンテナ起動
+  - `just down` - コンテナ停止
+  - `just logs` - ログ確認
+
+## Command Execution Guide
+
+- **重要**: すべてのコマンドはDockerコンテナ経由で実行する
+- ホストマシンに直接 rails, rspec 等はインストールされていない
+- 作業ディレクトリ: `auth-provider/`（docker-compose.ymlがある場所）
+
+### Backend (Rails) コマンド
+
+```bash
+# RSpec テスト実行
+docker compose run --rm backend rspec
+
+# 特定のテストファイル実行
+docker compose run --rm backend rspec spec/path/to/spec.rb
+
+# Rails コンソール
+docker compose run --rm backend rails c
+
+# マイグレーション実行
+docker compose run --rm backend rails db:migrate
+
+# Seed データ投入
+docker compose run --rm backend rails db:seed
+
+# Bundler
+docker compose run --rm backend bundle install
+```
+
+### コンテナ名一覧
+
+| コンテナ名 | 用途 |
+| -- | -- |
+| `backend` | Rails アプリケーション |
+| `backend-db` | MySQL データベース |
+| `backend-redis` | Redis（セッション/キャッシュ） |
+| `nginx` | リバースプロキシ |
+
+### 起動中コンテナへのコマンド実行
+
+```bash
+# 起動中のコンテナ内でコマンド実行（exec）
+docker compose exec backend rails c
+
+# 新規コンテナを起動してコマンド実行（run --rm）
+docker compose run --rm backend rails c
+```
+
+- `exec`: 起動中のコンテナに接続（コンテナが起動していないとエラー）
+- `run --rm`: 新規コンテナを起動して実行後に削除（コンテナ停止中でも実行可能）
+
+## Setup Guide
+
+### 秘密鍵の生成
+
+```bash
+# OIDC署名用秘密鍵を作成
+openssl genrsa -out volumes/backend/certs/private.pem 2048
+```
+
+### ローカル証明書の発行
+
+```bash
+# mkcertのインストールと証明書発行
+brew install mkcert
+mkcert -install
+mkcert \
+  -cert-file ./volumes/nginx/certs/fullchain.pem \
+  -key-file ./volumes/nginx/certs/privkey.pem \
+  dev.auth-provider.com
+```
+
+### ネットワーク設定
+
+```bash
+# ループバックエイリアスの追加
+sudo ifconfig lo0 alias 127.0.0.2 up
+
+# /etc/hosts に追記
+127.0.0.2 dev.auth-provider.com
+```
+
+## Integration Points
+
+- Relying Party (RP):
+  - price-monitoring Frontend（Next.js）
+  - price-monitoring Backend（Rails API）
+- 認可スキップ:
+  - 信頼されたアプリケーションとして認可画面をスキップ
