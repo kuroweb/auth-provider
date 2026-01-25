@@ -25,8 +25,14 @@ COPY . .
 # gem
 RUN bundle install
 
-# Tailwind CSS ビルド
-RUN bin/rails tailwindcss:build
+# Tailwind CSS ビルド（データベース不要なタスクのためダミー値を設定）
+RUN RAILS_ENV=production \
+    SECRET_KEY_BASE=dummy \
+    DB_USER_NAME=dummy \
+    DB_PASSWORD=dummy \
+    DB_HOST_NAME=dummy \
+    DOMAIN_NAME=dummy \
+    bin/rails tailwindcss:build
 
 EXPOSE 3000
 CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000", "-e", "production"]
