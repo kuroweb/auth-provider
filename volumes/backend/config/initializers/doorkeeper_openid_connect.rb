@@ -2,7 +2,7 @@
 
 Doorkeeper::OpenidConnect.configure do # rubocop:disable Metrics/BlockLength
   issuer do |_resource_owner, _application|
-    "https://#{ENV.fetch('DOMAIN_NAME')}"
+    "https://#{ENV.fetch('DOMAIN_NAME', nil)}"
   end
 
   signing_key_path = Rails.root.join("certs/private.pem")

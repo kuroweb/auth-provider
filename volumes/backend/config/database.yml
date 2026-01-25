@@ -20,9 +20,9 @@ default: &default
 development:
   <<: *default
   database: backend_development
-  username: <%= ENV.fetch("DB_USER_NAME") %>
-  password: <%= ENV.fetch("DB_PASSWORD") %>
-  host: <%= ENV.fetch("DB_HOST_NAME") %>
+  username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+  password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+  host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -30,9 +30,9 @@ development:
 test:
   <<: *default
   database: backend_test
-  username: <%= ENV.fetch("DB_USER_NAME") %>
-  password: <%= ENV.fetch("DB_PASSWORD") %>
-  host: <%= ENV.fetch("DB_HOST_NAME") %>
+  username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+  password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+  host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -58,27 +58,27 @@ production:
   primary:
     <<: *default
     database: backend_production
-    username: <%= ENV.fetch("DB_USER_NAME") %>
-    password: <%= ENV.fetch("DB_PASSWORD") %>
-    host: <%= ENV.fetch("DB_HOST_NAME") %>
+    username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+    password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+    host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
 
   queue:
     <<: *default
     database: backend_production
-    username: <%= ENV.fetch("DB_USER_NAME") %>
-    password: <%= ENV.fetch("DB_PASSWORD") %>
-    host: <%= ENV.fetch("DB_HOST_NAME") %>
+    username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+    password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+    host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
 
   cache:
     <<: *default
     database: backend_production
-    username: <%= ENV.fetch("DB_USER_NAME") %>
-    password: <%= ENV.fetch("DB_PASSWORD") %>
-    host: <%= ENV.fetch("DB_HOST_NAME") %>
+    username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+    password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+    host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
 
   cable:
     <<: *default
     database: backend_production
-    username: <%= ENV.fetch("DB_USER_NAME") %>
-    password: <%= ENV.fetch("DB_PASSWORD") %>
-    host: <%= ENV.fetch("DB_HOST_NAME") %>
+    username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+    password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+    host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
