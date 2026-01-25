@@ -25,5 +25,8 @@ COPY . .
 # gem
 RUN bundle install
 
+# Tailwind CSS ビルド
+RUN bin/rails tailwindcss:build
+
 EXPOSE 3000
 CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000", "-e", "production"]
