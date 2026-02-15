@@ -1,0 +1,36 @@
+name: Deploy All (Integration)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy_all:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
+
+      - name: Build All Docker Images
+        run: |
+          make build-backend tag_suffix=${{ github.sha }} environment=integration
+
+      - name: Push All Docker Images
+        run: |
+          make push-backend tag_suffix=${{ github.sha }} environment=integration
+
+      - name: Update Kubernetes Manifests
+        run: |
+          git config --global user.name "${{ secrets.GIT_COMMIT_USER }}"
+          git config --global user.email "${{ secrets.GIT_COMMIT_EMAIL }}"
+          git clone https://${{ secrets.GIT_REPO_USER }}:${{ secrets.GIT_TOKEN }}@github.com/${{ secrets.GIT_REPO_USER }}/k8s
+          cd k8s/manifests/auth-provider-integration
+          make apply-backend tag_suffix=${{ github.sha }}
+          make commit
+          make push
