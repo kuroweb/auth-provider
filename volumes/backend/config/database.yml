@@ -54,6 +54,35 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
+integration:
+  primary:
+    <<: *default
+    database: backend_integration
+    username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+    password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+    host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
+
+  queue:
+    <<: *default
+    database: backend_integration
+    username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+    password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+    host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
+
+  cache:
+    <<: *default
+    database: backend_integration
+    username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+    password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+    host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
+
+  cable:
+    <<: *default
+    database: backend_integration
+    username: <%= ENV.fetch("DB_USER_NAME", nil) %>
+    password: <%= ENV.fetch("DB_PASSWORD", nil) %>
+    host: <%= ENV.fetch("DB_HOST_NAME", nil) %>
+
 production:
   primary:
     <<: *default

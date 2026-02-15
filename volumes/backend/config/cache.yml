@@ -11,6 +11,10 @@ development:
 test:
   <<: *default
 
+integration:
+  database: cache
+  <<: *default
+
 production:
   database: cache
   <<: *default

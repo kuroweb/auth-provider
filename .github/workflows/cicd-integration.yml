@@ -1,0 +1,41 @@
+name: CI/CD (Integration)
+
+concurrency: integration
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+jobs:
+  check_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend_cd: ${{ steps.filter.outputs.backend_cd }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend_cd:
+              - './volumes/backend/!(spec)/**'
+              - './containers/backend/**'
+
+  backend_cd:
+    needs:
+      - check_changes
+    if: ${{ needs.check_changes.outputs.backend_cd == 'true' || github.event_name == 'workflow_dispatch' }}
+    uses: ./.github/workflows/reusable-cd.yml
+    with:
+      service_name: "k8s/manifests/auth-provider-integration"
+      build_command: "make build-backend tag_suffix=${{ github.sha }}"
+      push_command: "make push-backend tag_suffix=${{ github.sha }}"
+      apply_command: "make apply-backend tag_suffix=${{ github.sha }}"
+    secrets:
+      TAILSCALE_OAUTH_CLIENT_ID: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+      TAILSCALE_OAUTH_CLIENT_SECRET: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+      GIT_COMMIT_USER: ${{ secrets.GIT_COMMIT_USER }}
+      GIT_COMMIT_EMAIL: ${{ secrets.GIT_COMMIT_EMAIL }}
+      GIT_REPO_USER: ${{ secrets.GIT_REPO_USER }}
+      GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
