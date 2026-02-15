@@ -1,0 +1,33 @@
+FROM ruby:3.2.2
+
+#===================
+# packageセットアップ
+#===================
+RUN apt-get update && apt-get install -y \
+  nodejs \
+  npm \
+  default-mysql-client \
+  less \
+  vim \
+  curl \
+  sudo
+
+RUN npm i -g n && n 24.0.0
+
+#======================
+# プロジェクトセットアップ
+#======================
+WORKDIR /app
+
+# application
+COPY . .
+
+# gem
+RUN bundle install
+
+# アセットプリコンパイル
+RUN RAILS_ENV=integration SECRET_KEY_BASE=dummy bin/rails tailwindcss:build && \
+    RAILS_ENV=integration SECRET_KEY_BASE=dummy bundle exec rails assets:precompile
+
+EXPOSE 3000
+CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000", "-e", "integration"]

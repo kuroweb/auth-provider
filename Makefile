@@ -7,6 +7,7 @@
 registry := docker-registry.kuroweb.net
 project := auth-provider
 tag_suffix := $(shell git rev-parse --short HEAD)
+environment ?= production
 
 #
 # util
@@ -25,12 +26,13 @@ push-all: push-backend
 # backend
 #
 
-backend_tag := $(registry)/$(project)-backend:$(tag_suffix)
+backend_tag := $(registry)/$(project)-backend-$(environment):$(tag_suffix)
+backend_dockerfile := containers/backend/Dockerfile.$(environment)
 
 build-backend:
 	docker build \
 	-t $(backend_tag) \
-	-f containers/backend/Dockerfile.prod volumes/backend
+	-f $(backend_dockerfile) volumes/backend
 
 push-backend:
 	docker push $(backend_tag)

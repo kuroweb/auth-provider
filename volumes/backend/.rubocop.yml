@@ -3,6 +3,13 @@ require:
   - rubocop-rails
   - rubocop-rspec
 
+Rails/UnknownEnv:
+  Environments:
+    - development
+    - test
+    - integration
+    - production
+
 AllCops:
   Exclude:
     - bin/**/*

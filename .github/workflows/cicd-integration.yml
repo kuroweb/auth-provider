@@ -29,8 +29,8 @@ jobs:
     uses: ./.github/workflows/reusable-cd.yml
     with:
       service_name: "k8s/manifests/auth-provider-integration"
-      build_command: "make build-backend tag_suffix=${{ github.sha }}"
-      push_command: "make push-backend tag_suffix=${{ github.sha }}"
+      build_command: "make build-backend tag_suffix=${{ github.sha }} environment=integration"
+      push_command: "make push-backend tag_suffix=${{ github.sha }} environment=integration"
       apply_command: "make apply-backend tag_suffix=${{ github.sha }}"
     secrets:
       TAILSCALE_OAUTH_CLIENT_ID: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
