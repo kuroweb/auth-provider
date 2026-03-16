@@ -1,6 +1,6 @@
 # auth-provider
 
-[![CI/CD](https://github.com/kuroweb/auth-provider/actions/workflows/cicd.yml/badge.svg)](https://github.com/kuroweb/auth-provider/actions/workflows/cicd.yml)
+[![CI/CD (Integration)](https://github.com/kuroweb/auth-provider/actions/workflows/cicd-integration.yml/badge.svg)](https://github.com/kuroweb/auth-provider/actions/workflows/cicd-integration.yml) [![CI/CD (Production)](https://github.com/kuroweb/auth-provider/actions/workflows/cicd-production.yml/badge.svg)](https://github.com/kuroweb/auth-provider/actions/workflows/cicd-production.yml)
 
 - OpenID Connect学習用リポジトリ
 - OPとして実装している
