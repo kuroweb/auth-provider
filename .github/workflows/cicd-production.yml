@@ -31,7 +31,7 @@ jobs:
       service_name: "k8s/manifests/auth-provider"
       build_command: "make build-backend tag_suffix=${{ github.sha }} environment=production"
       push_command: "make push-backend tag_suffix=${{ github.sha }} environment=production"
-      apply_command: "make apply-backend tag_suffix=${{ github.sha }}"
+      apply_command: "make update-image ENV=production IMAGE=auth-provider-backend tag_suffix=${{ github.sha }}"
     secrets:
       TAILSCALE_OAUTH_CLIENT_ID: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
       TAILSCALE_OAUTH_CLIENT_SECRET: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
