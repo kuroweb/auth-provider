@@ -37,5 +37,4 @@ jobs:
       TAILSCALE_OAUTH_CLIENT_SECRET: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
       GIT_COMMIT_USER: ${{ secrets.GIT_COMMIT_USER }}
       GIT_COMMIT_EMAIL: ${{ secrets.GIT_COMMIT_EMAIL }}
-      GIT_REPO_USER: ${{ secrets.GIT_REPO_USER }}
-      GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+      K8S_DEPLOY_KEY: ${{ secrets.K8S_DEPLOY_KEY }}
